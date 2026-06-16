@@ -41,8 +41,6 @@ $vehicles = [
     ['id' => 16, 'type' => 'Car', 'name' => 'Ferrari SF90', 'model' => 'Sports Car', 'capacity' => '1 passengers', 'price_per_day' => 7000, 'status' => 'available', 'icon' => '🚗', 'image' => 'ferrari.webp'],
     ['id' => 17, 'type' => 'Car', 'name' => 'Porsche 911 Carrera 2023', 'model' => 'Sports Car', 'capacity' => '2 passengers', 'price_per_day' => 7500, 'status' => 'available', 'icon' => '🚗', 'image' => 'porsche.png'],
     ['id' => 18, 'type' => 'Car', 'name' => 'Lamborghini Huracan EVO', 'model' => 'Sports Car', 'capacity' => '2 passengers', 'price_per_day' => 9800, 'status' => 'available', 'icon' => '🚗', 'image' => 'lambo-removebg-preview.png'],
-        
-
 ];
 
 $drivers = [
@@ -95,7 +93,6 @@ function is_vehicle_available($vehicle_id, $start_date, $end_date, $bookings)
             $req_start = strtotime($start_date);
             $req_end = strtotime($end_date);
 
-            
             if (!($req_end < $booking_start || $req_start > $booking_end)) {
                 return false;
             }
@@ -285,717 +282,200 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle Rental System</title>
+    <title>Chauffeur Fleet | EcoTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(circle at top left, rgba(255,255,255,0.16), transparent 28%),
-                        radial-gradient(circle at bottom right, rgba(255,255,255,0.08), transparent 24%),
-                        linear-gradient(135deg, #667eea 0%, #764ba2 48%, #2f3fa8 100%);
-            background-size: 220% 220%;
-            animation: gradientBG 16s ease infinite;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 28px;
-            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.18);
-            overflow: hidden;
-            position: relative;
-            padding: 20px;
-        }
-
-        header {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        header h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-
-        header p {
-            color: #666;
-            font-size: 1.1em;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .nav-tab {
-            padding: 12px 24px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s;
-            color: #333;
-        }
-
-        .nav-tab:hover {
-            background: #f0f0f0;
-        }
-
-        .nav-tab.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .user-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 0 0;
-            gap: 10px;
-        }
-
-        .user-bar span {
-            color: #333;
-            font-size: 1em;
-            font-weight: 600;
-        }
-
-        .logout-button {
-            display: inline-block;
-            background: #dc3545;
-            color: white;
-            padding: 10px 18px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: background 0.25s ease;
-        }
-
-        .logout-button:hover {
-            background: #c82333;
-        }
-
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .card {
-            background: rgba(255,255,255,0.96);
-            padding: 30px;
-            border-radius: 18px;
-            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.12);
-            margin-bottom: 20px;
-            animation: fadeInUp 0.9s ease both;
-        }
-
-        .card h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-
-        .card h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            margin-top: 20px;
-        }
-
-        .vehicle-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .vehicle-card {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-        }
-
-        .vehicle-card.unavailable {
-            opacity: 0.55;
-            cursor: not-allowed;
-            pointer-events: none;
-            border-color: #d1d1d1;
-            filter: grayscale(30%);
-        }
-
-        .vehicle-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
-            border-color: #667eea;
-        }
-
-        .vehicle-icon {
-            margin-bottom: 10px;
-            overflow: hidden;
-            border-radius: 8px;
-        }
-
-        .vehicle-image {
-            width: 100%;
-            height: 180px;
-            object-fit: contain;
-            object-position: center;
-            border-radius: 8px;
-            background: #ffffff;
-        }
-
-        .vehicle-name {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .vehicle-details {
-            color: #666;
-            font-size: 0.95em;
-            margin-bottom: 5px;
-        }
-
-        .vehicle-price {
-            color: #667eea;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            margin-bottom: 10px;
-        }
-
-        .badge-available {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .badge-cancelled {
-            background: #f8d7da;
-            color: #842029;
-        }
-
-        .badge-type {
-            background: #cfe2ff;
-            color: #084298;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="date"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1em;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="date"]:focus,
-        input[type="number"]:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        @media (max-width: 600px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #764ba2;
-        }
-
-        button.secondary {
-            background: #6c757d;
-        }
-
-        button.secondary:hover {
-            background: #5a6268;
-        }
-
-        button.danger {
-            background: #dc3545;
-        }
-
-        button.danger:hover {
-            background: #c82333;
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
-
-        .error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #842029;
-        }
-
-        .success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-
-        .message ul {
-            margin-top: 10px;
-            margin-left: 20px;
-        }
-
-        .message li {
-            margin-bottom: 5px;
-        }
-
-        .booking-card {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-        }
-
-        .booking-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .booking-id {
-            color: #667eea;
-            font-weight: bold;
-        }
-
-        .booking-status {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-
-        .status-confirmed {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-reserved {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-cancelled {
-            background: #f8d7da;
-            color: #842029;
-            text-decoration: line-through;
-        }
-
-        .booking-details {
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .booking-details dt {
-            font-weight: 600;
-            display: inline;
-        }
-
-        .booking-details dd {
-            display: inline;
-            margin-right: 20px;
-        }
-
-        .driver-profile {
-            background: #eef2ff;
-            border: 1px solid #c7d2fe;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 20px;
-            color: #1f2937;
-        }
-
-        .driver-profile h3 {
-            margin-bottom: 10px;
-            color: #4338ca;
-        }
-
-        .driver-profile p {
-            margin-bottom: 8px;
-        }
-
-        .driver-profile strong {
-            display: inline-block;
-            width: 110px;
-        }
-
-        .driver-photo {
-            width: 96px;
-            height: 96px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-right: 12px;
-            float: left;
-            border: 2px solid #e6edf9;
-            background: #fff;
-        }
-
-        .booking-vehicle-photo {
-            width: 140px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin-right: 12px;
-            float: left;
-            border: 1px solid #e9ecef;
-            background: #fff;
-        }
-
-        .total-cost {
-            color: #667eea;
-            font-size: 1.3em;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        .empty-state-icon {
-            font-size: 4em;
-            margin-bottom: 15px;
-        }
-
-        .sidebar {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        .sidebar h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-
-        .sidebar-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .sidebar-item:last-child {
-            border-bottom: none;
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-            animation: fadeInUp 0.9s ease both;
-            animation-delay: 0.18s;
-        }
-
-        .search-bar input[type="text"],
-        .search-bar select {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1em;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .search-bar button {
-            padding: 12px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s;
-            white-space: nowrap;
-        }
-
-        .search-bar button:hover {
-            background: #764ba2;
-        }
-
-        .search-bar button.reset {
-            background: #6c757d;
-            padding: 12px 18px;
-        }
-
-        .search-bar button.reset:hover {
-            background: #5a6268;
-        }
-
-        .search-results-count {
-            color: #666;
-            font-size: 0.95em;
-            margin-bottom: 10px;
-        }
-
-        .rating-section {
-            background: #f0f4ff;
-            border: 1px solid #c7d2fe;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        .rating-section h4 {
-            color: #4338ca;
-            margin-bottom: 12px;
-            font-size: 1em;
-        }
-
-        .star-rating {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .star-rating input[type="radio"] {
-            display: none;
-        }
-
-        .star-rating label {
-            display: inline-block;
-            font-size: 2em;
-            cursor: pointer;
-            color: #ddd;
-            transition: color 0.2s;
-            margin: 0;
-            padding: 0;
-        }
-
-        .star-rating input[type="radio"]:checked ~ label,
-        .star-rating label:hover,
-        .star-rating label:hover ~ label {
-            color: #ffc107;
-        }
-
-        .star-rating {
-            display: flex;
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-            width: fit-content;
-        }
-
-        .rating-text {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 8px;
-        }
-
-        .rating-display {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 6px;
-            padding: 10px;
-            color: #155724;
-            margin-top: 10px;
-            font-size: 0.95em;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        :root {
+            --primary: #10b981; --primary-dark: #059669; --bg: #f8fafc;
+            --surface: #ffffff; --text: #0f172a; --text-muted: #64748b;
+            --border: #e2e8f0; --sidebar-w: 260px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+        
+        .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; top: 0; left: 0; z-index: 50; }
+        .logo-area { padding: 1.5rem; border-bottom: 1px solid var(--border); font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+        .nav-menu { padding: 1.5rem 1rem; flex-grow: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+        .nav-item { padding: 0.75rem 1rem; border-radius: 0.5rem; color: var(--text-muted); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; cursor: pointer; transition: 0.2s; background: transparent; border: none; text-align: left; font-size: 1rem; width: 100%; }
+        .nav-item:hover { background: #f1f5f9; color: var(--text); }
+        .nav-item.active { background: #ecfdf5; color: var(--primary-dark); }
+        .user-area { padding: 1.5rem; border-top: 1px solid var(--border); }
+        .user-name { font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
+        .logout-btn { display: inline-block; mt: 0.5rem; color: #ef4444; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; }
+        
+        .main-content { flex: 1; margin-left: var(--sidebar-w); padding: 2rem 3rem; }
+        .page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; }
+        .page-title { font-size: 2rem; font-weight: 800; color: var(--text); }
+        .page-subtitle { color: var(--text-muted); margin-top: 0.25rem; }
+        
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .kpi-card { background: var(--surface); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .kpi-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 1.75rem; font-weight: 800; color: var(--text); }
+        
+        .content-section { display: none; animation: fadeIn 0.3s ease; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .panel { background: var(--surface); border-radius: 1rem; border: 1px solid var(--border); padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .panel h2 { font-size: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        
+        .search-bar { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        .search-bar input, .search-bar select, select, input { padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; font-size: 0.95rem; background: var(--bg); outline: none; transition: border 0.2s; }
+        .search-bar input:focus, select:focus, input:focus { border-color: var(--primary); }
+        .search-bar input { flex: 1; }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: 0.2s; border: none; font-size: 0.95rem; color: white; text-decoration: none; display: inline-block; }
+        .btn-primary { background: var(--primary); }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--text-muted); }
+        .btn-danger { background: #ef4444; }
+        
+        .vehicle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .vehicle-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; overflow: hidden; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
+        .vehicle-card:hover:not(.unavailable) { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .vehicle-card.unavailable { opacity: 0.6; filter: grayscale(1); cursor: not-allowed; }
+        .v-image-container { height: 160px; padding: 1rem; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+        .v-image-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        .v-details { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+        .v-tags { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-type { background: #e0e7ff; color: #3730a3; }
+        .badge-status { background: #d1fae5; color: #065f46; }
+        .badge-unavail { background: #fee2e2; color: #991b1b; }
+        .v-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+        .v-specs { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; flex: 1; }
+        .v-price { font-size: 1.25rem; font-weight: 800; color: var(--primary-dark); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text); }
+        .form-group input, .form-group select { width: 100%; }
+        .driver-profile { background: #ecfdf5; border: 1px dashed var(--primary); padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; gap: 1.5rem; align-items: center; }
+        .driver-profile img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .alert { padding: 1rem 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-size: 0.95rem; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+
+        .booking-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+        .b-header { width: 100%; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
+        .b-id { font-weight: 700; color: var(--text); }
+        .b-body { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start; }
+        .b-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.9rem; flex: 1; min-width: 280px; }
+        @media (max-width: 480px) { .b-grid { grid-template-columns: 1fr; } }
+        .b-label { color: var(--text-muted); font-weight: 600; }
+        .b-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.5rem; }
+
+        .star-rating { display: flex; flex-direction: row-reverse; gap: 0.25rem; }
+        .star-rating input { display: none; }
+        .star-rating label { font-size: 1.5rem; color: #cbd5e1; cursor: pointer; transition: color 0.2s; }
+        .star-rating input:checked ~ label, .star-rating label:hover, .star-rating label:hover ~ label { color: #f59e0b; }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <header>
-            <h1>Vehicle Rental System</h1>
-            <p>Manage your fleet and book vehicles with ease</p>
-            <div class="user-bar">
-                <span>Welcome, <?php echo safe($current_user['name'] ?? $current_user['username'] ?? 'Guest'); ?></span>
-                <a href="logout.php" class="logout-button">Log out</a>
-            </div>
-        </header>
+    <aside class="sidebar">
+        <div class="logo-area">🌿 EcoTrack</div>
+        <div class="nav-menu">
+            <button class="nav-item active" data-section="vehicles" onclick="showSection('vehicles', this)">
+                <span>🚙</span> Chauffeur Fleet
+            </button>
+            <button class="nav-item" data-section="book" onclick="showSection('book', this)">
+                <span>📝</span> Book Ride
+            </button>
+            <button class="nav-item" data-section="bookings" onclick="showSection('bookings', this)">
+                <span>📋</span> My Bookings
+            </button>
+        </div>
+        <div class="user-area">
+            <div class="user-name"><?php echo safe($current_user['name'] ?? 'User'); ?></div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Chauffeur Mode</div>
+            <a href="selection.php" class="logout-btn" style="color: var(--primary);">Change Mode</a><br>
+            <a href="logout.php" class="logout-btn">Sign Out</a>
+        </div>
+    </aside>
 
-        <div class="nav-tabs">
-            <button class="nav-tab active" data-section="vehicles" onclick="showSection('vehicles', this)">Available Vehicles</button>
-            <button class="nav-tab" data-section="book" onclick="showSection('book', this)">Book a Vehicle</button>
-            <button class="nav-tab" data-section="bookings" onclick="showSection('bookings', this)">My Bookings</button>
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Chauffeur Service</h1>
+                <p class="page-subtitle">Relax while our professional eco-drivers navigate your route</p>
+            </div>
+            <div style="font-weight: 500; color: var(--text-muted);"><?php echo date('F d, Y'); ?></div>
         </div>
 
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Available Vehicles</div>
+                <div class="kpi-value" id="availCount"><?php echo count($vehicles); ?></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Active Services</div>
+                <div class="kpi-value"><?php echo count(array_filter($bookings, fn($b) => in_array($b['status'], ['confirmed','reserved']))); ?></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Driver Status</div>
+                <div class="kpi-value" style="color: var(--primary-dark);">All Online</div>
+            </div>
+        </div>
+
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-error"><ul><?php foreach ($errors as $error): ?><li><?php echo safe($error); ?></li><?php endforeach; ?></ul></div>
+        <?php endif; ?>
+        <?php if (!empty($messages)): ?>
+            <div class="alert alert-success"><ul><?php foreach ($messages as $message): ?><li><?php echo safe($message); ?></li><?php endforeach; ?></ul></div>
+        <?php endif; ?>
+
         <div id="vehicles" class="content-section active">
-            <div class="card">
-                <h2>Available Vehicles</h2>
-                <p>Browse our fleet of vehicles available for rent</p>
-
+            <div class="panel">
+                <h2>Explore Fleet Categories</h2>
                 <div class="search-bar">
-                    <input type="text" id="vehicleSearch" placeholder="Search by vehicle name or type..." onkeyup="filterVehicles()">
+                    <input type="text" id="vehicleSearch" placeholder="Search by model name..." onkeyup="filterVehicles()">
                     <select id="typeFilter" onchange="filterVehicles()">
-                        <option value="">All Types</option>
-                        <option value="Car">Car</option>
-                        <option value="Bike">Bike</option>
-                        <option value="Van">Van</option>
-                        <option value="Truck">Truck</option>
+                        <option value="">All Vehicle Categories</option>
+                        <option value="Car">Sedans & SUVs</option>
+                        <option value="Bike">Bikes & Scooters</option>
+                        <option value="Van">Vans</option>
+                        <option value="Truck">Pickups & Cargo</option>
                     </select>
-                    <button onclick="resetVehicleSearch();" class="reset">Reset</button>
+                    <button onclick="resetVehicleSearch()" class="btn btn-secondary">Reset</button>
                 </div>
-
-                <div class="search-results-count">
-                    Showing <span id="resultCount"><?php echo count($vehicles); ?></span> vehicle(s)
-                </div>
-
-                <div class="vehicle-grid" id="vehicleGrid">
+                
+                <div class="vehicle-grid">
                     <?php foreach ($vehicles as $vehicle): ?>
                         <?php $is_unavailable = vehicle_has_active_booking($vehicle['id'], $bookings); ?>
-                        <div class="vehicle-card<?php echo $is_unavailable ? ' unavailable' : ''; ?>" <?php if (!$is_unavailable): ?>onclick="bookVehicle(<?php echo $vehicle['id']; ?>, '<?php echo safe($vehicle['name']); ?>')"<?php endif; ?> data-vehicle-type="<?php echo safe($vehicle['type']); ?>" data-vehicle-name="<?php echo safe(strtolower($vehicle['name'])); ?>">
-                            <img src="assets/images/<?php echo safe($vehicle['image']); ?>" alt="<?php echo safe($vehicle['name']); ?>" class="vehicle-image">
-                            <div class="badge badge-type"><?php echo safe($vehicle['type']); ?></div>
-                            <?php if ($is_unavailable): ?>
-                                <div class="badge badge-cancelled">Unavailable</div>
-                            <?php else: ?>
-                                <div class="badge badge-available">Available</div>
-                            <?php endif; ?>
-                            <div class="vehicle-name"><?php echo safe($vehicle['name']); ?></div>
-                            <div class="vehicle-details">
-                                <strong>Model:</strong> <?php echo safe($vehicle['model']); ?><br>
-                                <strong>Capacity:</strong> <?php echo safe($vehicle['capacity']); ?>
+                        <div class="vehicle-card <?php echo $is_unavailable ? 'unavailable' : ''; ?>" <?php if (!$is_unavailable): ?>onclick="bookVehicle(<?php echo $vehicle['id']; ?>)"<?php endif; ?> data-vehicle-type="<?php echo safe($vehicle['type']); ?>" data-vehicle-name="<?php echo safe(strtolower($vehicle['name'])); ?>">
+                            <div class="v-image-container">
+                                <img src="assets/images/<?php echo safe($vehicle['image']); ?>" alt="<?php echo safe($vehicle['name']); ?>">
                             </div>
-                            <div class="vehicle-price">₱<?php echo number_format($vehicle['price_per_day']); ?>/day</div>
+                            <div class="v-details">
+                                <div class="v-tags">
+                                    <span class="badge badge-type"><?php echo safe($vehicle['type']); ?></span>
+                                    <span class="badge <?php echo $is_unavailable ? 'badge-unavail' : 'badge-status'; ?>"><?php echo $is_unavailable ? 'Booked' : 'Available'; ?></span>
+                                </div>
+                                <div class="v-name"><?php echo safe($vehicle['name']); ?></div>
+                                <div class="v-specs"><?php echo safe($vehicle['model']); ?> • Max Capacity: <?php echo safe($vehicle['capacity']); ?></div>
+                                <div class="v-price">₱<?php echo number_format($vehicle['price_per_day']); ?><span style="font-size:0.8rem; font-weight:500; color:var(--text-muted);"> /day</span></div>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
         </div>
 
-        
         <div id="book" class="content-section">
-            <div class="card">
-                <h2>Book a Vehicle</h2>
-
-                <?php if (!empty($errors)): ?>
-                    <div class="message error">
-                        <strong>Please fill in all required fields:</strong>
-                        <ul>
-                            <?php foreach ($errors as $error): ?>
-                                <li><?php echo safe($error); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (!empty($messages)): ?>
-                    <div class="message success">
-                        <strong>Success!</strong>
-                        <ul>
-                            <?php foreach ($messages as $message): ?>
-                                <li><?php echo safe($message); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-
+            <div class="panel">
+                <h2>Set Up Your Booking</h2>
                 <form method="post" onsubmit="return confirmBooking();">
                     <input type="hidden" name="section" value="book_vehicle">
-
-                    <div class="form-group">
-                        <label>Select Vehicle</label>
+                    
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Assigned Vehicle</label>
                         <select name="vehicle_id" required>
-                            <option value="">-- Choose a Vehicle --</option>
+                            <option value="">-- Choose a Fleet Vehicle --</option>
                             <?php foreach ($vehicles as $vehicle): ?>
                                 <?php $is_unavailable = vehicle_has_active_booking($vehicle['id'], $bookings); ?>
                                 <option value="<?php echo $vehicle['id']; ?>" <?php echo $is_unavailable ? 'disabled' : ''; ?>>
@@ -1005,250 +485,133 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </select>
                     </div>
 
-                    <div class="form-row">
+                    <div class="form-grid">
                         <div class="form-group">
                             <label>Start Date</label>
-                            <input type="date" name="start_date" value="<?php echo isset($_POST['start_date']) ? safe($_POST['start_date']) : ''; ?>" required>
+                            <input type="date" name="start_date" required>
                         </div>
                         <div class="form-group">
                             <label>End Date</label>
-                            <input type="date" name="end_date" value="<?php echo isset($_POST['end_date']) ? safe($_POST['end_date']) : ''; ?>" required>
+                            <input type="date" name="end_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Passenger Name</label>
+                            <input type="text" name="customer_name" value="<?php echo safe($default_customer_name); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Email Address</label>
+                            <input type="email" name="email" value="<?php echo safe($default_email); ?>" required>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Customer Name</label>
-                            <input type="text" name="customer_name" value="<?php echo isset($_POST['customer_name']) ? safe($_POST['customer_name']) : safe($default_customer_name); ?>" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Email Address</label>
-                            <input type="email" name="email" value="<?php echo isset($_POST['email']) ? safe($_POST['email']) : safe($default_email); ?>" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Choose a Driver</label>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Select Your Chauffeur</label>
                         <select name="driver" id="driverSelect" onchange="updateDriverProfile()" required>
-                            <option value="">-- Select a Driver --</option>
+                            <option value="">-- Assign a Verified Driver --</option>
                             <?php foreach ($drivers as $driverOption): ?>
-                                <option value="<?php echo safe($driverOption['name']); ?>" <?php echo (isset($_POST['driver']) && $_POST['driver'] === $driverOption['name']) ? 'selected' : ''; ?>><?php echo safe($driverOption['name']); ?> (★ <?php echo $driverOption['rating']; ?>/5)</option>
+                                <option value="<?php echo safe($driverOption['name']); ?>"><?php echo safe($driverOption['name']); ?> (★ <?php echo $driverOption['rating']; ?>/5)</option>
                             <?php endforeach; ?>
                         </select>
                     </div>
 
-                    <div class="driver-profile" id="driverProfile">
-                        <h3>Driver Profile</h3>
-                        <p>Select a driver to view their profile details.</p>
-                    </div>
+                    <div id="driverProfile" class="driver-profile" style="display:none;"></div>
 
-                    <div style="display:flex; gap: 12px; flex-wrap: wrap;">
-                        <button type="submit" name="action" value="book">Complete Booking</button>
-                        <button type="submit" name="action" value="reserve" class="secondary">Reserve Vehicle</button>
+                    <div style="display:flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="submit" name="action" value="book" class="btn btn-primary">Complete Booking</button>
+                        <button type="submit" name="action" value="reserve" class="btn btn-secondary">Place On Hold</button>
                     </div>
                 </form>
             </div>
         </div>
 
         <div id="bookings" class="content-section">
-            <div class="card">
-                <h2>My Bookings</h2>
-
-                <?php if (!empty($errors)): ?>
-                    <div class="message error">
-                        <strong>Error:</strong>
-                        <ul>
-                            <?php foreach ($errors as $error): ?>
-                                <li><?php echo safe($error); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
+            <div class="panel">
+                <h2>Current Bookings & Holds</h2>
+                <?php if (empty($bookings)): ?>
+                    <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                        <p>No active reservations discovered. Ready to catalog your first eco-trip?</p>
                     </div>
-                <?php endif; ?>
-
-                <?php if (!empty($messages)): ?>
-                    <div class="message success">
-                        <strong>Success!</strong>
-                        <ul>
-                            <?php foreach ($messages as $message): ?>
-                                <li><?php echo safe($message); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (!empty($bookings)): ?>
+                <?php else: ?>
                     <?php foreach ($bookings as $booking): ?>
                         <?php $vehicle = get_vehicle_by_id($booking['vehicle_id'], $vehicles); ?>
                         <div class="booking-card">
-                                <div class="booking-header">
-                                    <span class="booking-id">Booking #<?php echo $booking['booking_id']; ?></span>
-                                    <span class="booking-status <?php echo 'status-' . strtolower($booking['status']); ?>"><?php echo ucfirst($booking['status']); ?></span>
+                            <div class="b-header">
+                                <span class="b-id">Reservation Account #<?php echo $booking['booking_id']; ?></span>
+                                <span class="badge <?php echo $booking['status'] == 'confirmed' ? 'badge-status' : ($booking['status'] == 'reserved' ? 'badge-type' : 'badge-unavail'); ?>"><?php echo strtoupper($booking['status']); ?></span>
+                            </div>
+                            <div class="b-body">
+                                <div class="b-grid">
+                                    <div><span class="b-label">Vehicle Option:</span> <?php echo $vehicle ? safe($vehicle['name']) : 'Fleet Item'; ?></div>
+                                    <div><span class="b-label">Schedule:</span> <?php echo safe($booking['start_date']); ?> to <?php echo safe($booking['end_date']); ?> (<?php echo (int)$booking['days']; ?> Days)</div>
+                                    <div><span class="b-label">Chauffeur:</span> <?php echo safe($booking['driver']); ?></div>
+                                    <div><span class="b-label">Renter:</span> <?php echo safe($booking['customer_name']); ?></div>
                                 </div>
-                                <?php if ($vehicle && !empty($vehicle['image'])): ?>
-                                    <img src="<?php echo safe($vehicle['image']); ?>" alt="<?php echo safe($vehicle['name']); ?>" class="booking-vehicle-photo">
-                                <?php endif; ?>
-                                <div class="booking-details">
-                                    <dt>Vehicle:</dt>
-                                    <dd><?php echo $vehicle ? safe($vehicle['name']) : 'Unknown'; ?></dd><br>
-                                    <dt>Customer:</dt>
-                                    <dd><?php echo safe($booking['customer_name']); ?></dd><br>
-                                    <dt>Email:</dt>
-                                    <dd><?php echo safe($booking['email']); ?></dd><br>
-                                    <dt>Driver:</dt>
-                                    <dd>
-                                        <?php echo safe($booking['driver'] ?? 'Not selected'); ?>
-                                        <?php if (!empty($booking['driver_profile']['image'])): ?>
-                                            <br>
-                                            <img src="assets/images/<?php echo safe($booking['driver_profile']['image']); ?>" alt="<?php echo safe($booking['driver']); ?>" class="driver-photo">
-                                        <?php endif; ?>
-                                    </dd><br>
-                                    <dt>Driver Rating:</dt>
-                                    <dd><?php echo safe($booking['driver_profile']['rating'] ?? 'N/A'); ?> / 5</dd><br>
-                                    <dt>Experience:</dt>
-                                    <dd><?php echo safe($booking['driver_profile']['experience'] ?? 'N/A'); ?></dd><br>
-                                    <dt>License:</dt>
-                                    <dd><?php echo safe($booking['driver_profile']['license'] ?? 'N/A'); ?></dd><br>
-                                    <dt>Start Date:</dt>
-                                    <dd><?php echo safe($booking['start_date']); ?></dd><br>
-                                    <dt>End Date:</dt>
-                                    <dd><?php echo safe($booking['end_date']); ?></dd><br>
-                                    <dt>Rental Days:</dt>
-                                    <dd><?php echo (int)$booking['days']; ?> day<?php echo $booking['days'] != 1 ? 's' : ''; ?></dd>
+                            </div>
+                            <div class="b-footer">
+                                <div class="v-price" style="font-size:1.15rem;">Total: ₱<?php echo number_format($booking['total_cost']); ?></div>
+                                <div style="display:flex; gap: 1rem; align-items:center;">
+                                    <?php if (in_array($booking['status'], ['confirmed', 'reserved'], true)): ?>
+                                        <form method="post">
+                                            <input type="hidden" name="section" value="cancel_booking">
+                                            <input type="hidden" name="booking_id" value="<?php echo $booking['booking_id']; ?>">
+                                            <button type="submit" class="btn btn-danger" style="padding:0.5rem 1rem; font-size:0.85rem;" onclick="return confirm('Cancel this reservation portfolio?');">Cancel Ride</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
-                                <div style="clear: both;"></div>
-                            <div class="total-cost">Total Cost: ₱<?php echo number_format($booking['total_cost']); ?></div>
-
-                            <?php if (in_array($booking['status'], ['confirmed', 'reserved'], true)): ?>
-                                <form method="post" style="display: inline; margin-top: 10px;">
-                                    <input type="hidden" name="section" value="cancel_booking">
-                                    <input type="hidden" name="booking_id" value="<?php echo $booking['booking_id']; ?>">
-                                    <button type="submit" class="danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel Booking</button>
-                                </form>
-                            <?php endif; ?>
-
-                        
-                            <div class="rating-section">
-                                <h4>How satisfied are you with this rental?</h4>
+                            </div>
+                            
+                            <div style="background:var(--bg); padding:1rem; border-radius:0.5rem; margin-top:0.5rem;">
+                                <h4 style="font-size:0.9rem; margin-bottom:0.5rem;">Service Feedback Evaluation</h4>
                                 <?php if (isset($booking['satisfaction_rating'])): ?>
-                                    <div class="rating-display">
-                                        ★ Your rating: <strong><?php echo $booking['satisfaction_rating']; ?> / 5 stars</strong>
-                                    </div>
+                                    <div style="font-size:0.9rem; color:var(--primary-dark); font-weight:600;">★ Evaluation Submitted: <?php echo $booking['satisfaction_rating']; ?> / 5 Stars</div>
                                 <?php else: ?>
-                                    <form method="post" style="margin-top: 10px;">
+                                    <form method="post" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                                         <input type="hidden" name="section" value="rate_booking">
                                         <input type="hidden" name="booking_id" value="<?php echo $booking['booking_id']; ?>">
-                                        
                                         <div class="star-rating">
-                                            <input type="radio" id="rating-5-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="5" required>
-                                            <label for="rating-5-<?php echo $booking['booking_id']; ?>">★</label>
-                                            
-                                            <input type="radio" id="rating-4-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="4">
-                                            <label for="rating-4-<?php echo $booking['booking_id']; ?>">★</label>
-                                            
-                                            <input type="radio" id="rating-3-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="3">
-                                            <label for="rating-3-<?php echo $booking['booking_id']; ?>">★</label>
-                                            
-                                            <input type="radio" id="rating-2-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="2">
-                                            <label for="rating-2-<?php echo $booking['booking_id']; ?>">★</label>
-                                            
-                                            <input type="radio" id="rating-1-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="1">
-                                            <label for="rating-1-<?php echo $booking['booking_id']; ?>">★</label>
+                                            <input type="radio" id="r5-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="5" required><label for="r5-<?php echo $booking['booking_id']; ?>">★</label>
+                                            <input type="radio" id="r4-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="4"><label for="r4-<?php echo $booking['booking_id']; ?>">★</label>
+                                            <input type="radio" id="r3-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="3"><label for="r3-<?php echo $booking['booking_id']; ?>">★</label>
+                                            <input type="radio" id="r2-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="2"><label for="r2-<?php echo $booking['booking_id']; ?>">★</label>
+                                            <input type="radio" id="r1-<?php echo $booking['booking_id']; ?>" name="satisfaction_rating" value="1"><label for="r1-<?php echo $booking['booking_id']; ?>">★</label>
                                         </div>
-                                        <div class="rating-text">Click on the stars to rate your satisfaction</div>
-                                        <button type="submit" style="margin-top: 10px;">Submit Rating</button>
+                                        <button type="submit" class="btn btn-primary" style="padding:0.4rem 1rem; font-size:0.8rem;">Submit Rating</button>
                                     </form>
                                 <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <div class="empty-state-icon"></div>
-                        <p>No bookings yet. Start by booking a vehicle!</p>
-                    </div>
                 <?php endif; ?>
             </div>
         </div>
-
-        
-        <div class="sidebar">
-            <h3> System Information</h3>
-            <div class="sidebar-item">
-                <strong>Total Vehicles:</strong> <?php echo count($vehicles); ?>
-            </div>
-            <div class="sidebar-item">
-                <strong>Cars Available:</strong> <?php echo count(array_filter($vehicles, fn($v) => $v['type'] === 'Car')); ?>
-            </div>
-            <div class="sidebar-item">
-                <strong>Vans Available:</strong> <?php echo count(array_filter($vehicles, fn($v) => $v['type'] === 'Van')); ?>
-            </div>
-            <div class="sidebar-item">
-                <strong>Pickups Available:</strong> <?php echo count(array_filter($vehicles, fn($v) => $v['model'] === 'Pickup')); ?>
-            </div>
-            <div class="sidebar-item">
-                <strong>Bikes Available:</strong> <?php echo count(array_filter($vehicles, fn($v) => $v['type'] === 'Bike')); ?>
-            </div>
-            <div class="sidebar-item">
-                <strong>Total Confirmed Bookings:</strong> <?php echo count(array_filter($bookings, fn($b) => $b['status'] === 'confirmed')); ?>
-            </div>
-            <div class="sidebar-item">
-                <strong>Total Reserved Bookings:</strong> <?php echo count(array_filter($bookings, fn($b) => $b['status'] === 'reserved')); ?>
-            </div>
-            <div class="sidebar-item">
-                <strong>Current Date:</strong> <?php echo date('F d, Y'); ?>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script>
-        function showSection(sectionId, activeButton = null) {
-            const sections = document.querySelectorAll('.content-section');
-            sections.forEach(section => section.classList.remove('active'));
-
-            const targetSection = document.getElementById(sectionId);
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-
-            const tabs = document.querySelectorAll('.nav-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-
-            const activeTab = activeButton || document.querySelector(`.nav-tab[data-section="${sectionId}"]`);
-            if (activeTab) {
-                activeTab.classList.add('active');
-            }
+        function showSection(id, btn) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(btn) btn.classList.add('active');
+            else document.querySelector(`[data-section="${id}"]`).classList.add('active');
         }
 
-        function bookVehicle(vehicleId, vehicleName) {
+        function bookVehicle(id) {
             showSection('book');
-            document.querySelector('select[name="vehicle_id"]').value = vehicleId;
-            document.querySelector('select[name="vehicle_id"]').focus();
+            document.querySelector('select[name="vehicle_id"]').value = id;
         }
 
-        // Vehicle Search and Filter Functions
         function filterVehicles() {
-            const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
-            const typeFilter = document.getElementById('typeFilter').value;
-            const vehicleCards = document.querySelectorAll('.vehicle-card');
-            let visibleCount = 0;
-
-            vehicleCards.forEach(card => {
-                const vehicleName = card.dataset.vehicleName;
-                const vehicleType = card.dataset.vehicleType;
-                
-                const matchesSearch = vehicleName.includes(searchInput) || 
-                                     vehicleType.toLowerCase().includes(searchInput);
-                const matchesType = typeFilter === '' || vehicleType === typeFilter;
-                
-                if (matchesSearch && matchesType) {
-                    card.style.display = '';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
+            const term = document.getElementById('vehicleSearch').value.toLowerCase();
+            const type = document.getElementById('typeFilter').value;
+            let count = 0;
+            document.querySelectorAll('.vehicle-card').forEach(card => {
+                const matchName = card.dataset.vehicleName.includes(term);
+                const matchType = type === '' || card.dataset.vehicleType === type;
+                if(matchName && matchType) { card.style.display = ''; count++; }
+                else card.style.display = 'none';
             });
-
-            document.getElementById('resultCount').textContent = visibleCount;
+            document.getElementById('availCount').textContent = count;
         }
 
         function resetVehicleSearch() {
@@ -1257,50 +620,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             filterVehicles();
         }
 
-        const driverProfiles = <?php echo json_encode(array_column($drivers, null, 'name')); ?>;
-
+        const drivers = <?php echo json_encode(array_column($drivers, null, 'name')); ?>;
         function updateDriverProfile() {
-            const driverSelect = document.getElementById('driverSelect');
-            const profile = driverProfiles[driverSelect.value];
-            const profileBox = document.getElementById('driverProfile');
-
-            if (!profile) {
-                profileBox.innerHTML = '<h3>Driver Profile</h3><p>Select a driver to view their profile details.</p>';
-                return;
-            }
-
-            const imgHtml = profile.image ? `<img src="assets/images/${profile.image}" alt="${profile.name}" class="driver-photo">` : '';
-
-            profileBox.innerHTML = `
-                ${imgHtml}
-                <h3>${profile.name}</h3>
-                <p><strong>Experience:</strong> ${profile.experience}</p>
-                <p><strong>Rating:</strong> ${profile.rating} / 5 ⭐</p>
-                <p><strong>Specialty:</strong> ${profile.specialty}</p>
-                <p><strong>License:</strong> ${profile.license}</p>
-                <div style="clear: both;"></div>
+            const val = document.getElementById('driverSelect').value;
+            const box = document.getElementById('driverProfile');
+            if(!val || !drivers[val]) { box.style.display = 'none'; return; }
+            const d = drivers[val];
+            box.style.display = 'flex';
+            box.innerHTML = `
+                <img src="assets/images/${d.image}" alt="">
+                <div>
+                    <h4 style="font-weight:700; color:var(--text);">${d.name}</h4>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">
+                        Rating: ★ ${d.rating} | Experience: ${d.experience}<br>Specialty: ${d.specialty}
+                    </p>
+                </div>
             `;
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            if (document.getElementById('driverSelect')) {
-                updateDriverProfile();
-            }
+        function confirmBooking() { return confirm('Confirm your current application reservation details?'); }
 
-            const requestedSection = '<?php echo in_array($section, ["vehicles", "book", "bookings"]) ? $section : ($section === "book_vehicle" ? "book" : ($section === "rate_booking" ? "bookings" : "vehicles")); ?>';
-            showSection(requestedSection);
-
-            const successMessage = document.querySelector('.message.success');
-            if (successMessage && requestedSection !== 'bookings') {
-                showSection('bookings');
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentSec = '<?php echo in_array($section, ["vehicles", "book", "bookings"]) ? $section : "vehicles"; ?>';
+            showSection(currentSec);
+            if(document.querySelector('.alert-success') && currentSec !== 'bookings') showSection('bookings');
         });
-
-        function confirmBooking() {
-            return confirm('Are you sure you want to complete this booking?');
-        }
     </script>
 </body>
-
 </html>
-http://localhost:8000/vehicle_rental.php

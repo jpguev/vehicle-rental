@@ -134,7 +134,7 @@ function safe($value)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery | Vehicle Rental</title>
+    <title>Image Gallery | EcoTrack</title>
     <style>
         * {
             margin: 0;
@@ -144,7 +144,7 @@ function safe($value)
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -157,9 +157,9 @@ function safe($value)
         header {
             background: white;
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 16px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -168,7 +168,7 @@ function safe($value)
         }
 
         header h1 {
-            color: #667eea;
+            color: #10b981;
             font-size: 2em;
         }
 
@@ -197,7 +197,7 @@ function safe($value)
 
         .nav-buttons a,
         .nav-buttons button {
-            background: #667eea;
+            background: #10b981;
             color: white;
             padding: 10px 18px;
             border-radius: 8px;
@@ -210,30 +210,30 @@ function safe($value)
 
         .nav-buttons a:hover,
         .nav-buttons button:hover {
-            background: #764ba2;
+            background: #047857;
         }
 
         .logout-button {
-            background: #dc3545;
+            background: #ef4444;
         }
 
         .logout-button:hover {
-            background: #c82333;
+            background: #b91c1c;
         }
 
         .category-section {
             background: white;
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 16px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
 
         .category-section h2 {
-            color: #667eea;
+            color: #10b981;
             margin-bottom: 20px;
             font-size: 1.8em;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #10b981;
             padding-bottom: 10px;
         }
 
@@ -245,9 +245,9 @@ function safe($value)
         }
 
         .image-card {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
             overflow: hidden;
             transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
@@ -255,8 +255,8 @@ function safe($value)
 
         .image-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
-            border-color: #667eea;
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
         }
 
         .image-container {
@@ -296,9 +296,9 @@ function safe($value)
         .stats {
             background: white;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 16px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
@@ -307,9 +307,9 @@ function safe($value)
         .stat-item {
             text-align: center;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
             color: white;
-            border-radius: 8px;
+            border-radius: 12px;
         }
 
         .stat-number {
@@ -326,23 +326,23 @@ function safe($value)
         .search-container {
             background: white;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 16px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
 
         .search-container input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             font-size: 1em;
         }
 
         .search-container input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+            border-color: #10b981;
+            box-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
         }
 
         .empty-state {
@@ -381,13 +381,13 @@ function safe($value)
     <div class="container">
         <header>
             <div>
-                <h1>🖼️ Image Gallery</h1>
-                <p>All vehicle and driver images in our rental system</p>
+                <h1>🌿 EcoTrack Image Gallery</h1>
+                <p>All vehicle and driver images in our eco-rental system</p>
             </div>
             <div class="user-bar">
                 <span>Welcome, <?php echo safe($current_user['name'] ?? $current_user['username'] ?? 'Guest'); ?></span>
                 <div class="nav-buttons">
-                    <a href="vehicle_rental.php">Back to System</a>
+                    <a href="vehicle_rental.php">Back to EcoTrack</a>
                     <a href="logout.php" class="logout-button">Log out</a>
                 </div>
             </div>
@@ -429,7 +429,7 @@ function safe($value)
                                 <img src="assets/images/<?php echo safe($image['name']); ?>" alt="<?php echo safe($image['name']); ?>">
                             <?php else: ?>
                                 <div style="color: #999; text-align: center;">
-                                    <div style="font-size: 3em; margin-bottom: 10px;">📷</div>
+                                    <div style="font-size: 3em; margin-bottom: 10px;">🚫</div>
                                     <div>Image not found</div>
                                 </div>
                             <?php endif; ?>
@@ -469,7 +469,7 @@ function safe($value)
                     const emptyState = document.createElement('div');
                     emptyState.id = 'emptyState';
                     emptyState.className = 'empty-state';
-                    emptyState.innerHTML = '<div class="empty-state-icon">📷</div><div>No images found matching your search.</div>';
+                    emptyState.innerHTML = '<div class="empty-state-icon">🚫</div><div>No images found matching your search.</div>';
                     firstGrid.parentElement.appendChild(emptyState);
                 }
             } else {
