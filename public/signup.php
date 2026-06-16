@@ -89,7 +89,7 @@ function safe($value) { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF
     <div class="split-layout">
         <div class="hero-side">
             <h1>Create Account</h1>
-            <p>Join the EcoTrack community today and get access to our full fleet of sustainable vehicles.</p>
+            <p>Join the EcoTrack community today!</p>
         </div>
         <div class="form-side">
             <div class="form-container">

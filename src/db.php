@@ -67,10 +67,18 @@ function db_init(): void
             email VARCHAR(150) NOT NULL UNIQUE,
             license_uploaded TINYINT(1) NOT NULL DEFAULT 0,
             license_filename VARCHAR(255) DEFAULT NULL,
+            license_verified TINYINT(1) NOT NULL DEFAULT 0,
             rental_mode VARCHAR(32) DEFAULT "with_driver",
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=' . DB_CHARSET . ' COLLATE ' . DB_CHARSET . '_unicode_ci'
     );
+
+    // ensure existing installations get the new column if missing
+    try {
+        $pdo->exec('ALTER TABLE users ADD COLUMN IF NOT EXISTS license_verified TINYINT(1) NOT NULL DEFAULT 0');
+    } catch (Exception $e) {
+        // ignore if ALTER not supported by server version
+    }
 
     $pdo->exec(
         'CREATE TABLE IF NOT EXISTS vehicles (
@@ -280,6 +288,16 @@ function update_user_license(int $userId, string $filename): bool
     return db_execute('UPDATE users SET license_uploaded = 1, license_filename = :filename WHERE id = :id', [':filename' => $filename, ':id' => $userId]);
 }
 
+function verify_user_license(int $userId): bool
+{
+    return db_execute('UPDATE users SET license_verified = 1 WHERE id = :id', [':id' => $userId]);
+}
+
+function reject_user_license(int $userId): bool
+{
+    return db_execute('UPDATE users SET license_uploaded = 0, license_filename = NULL, license_verified = 0 WHERE id = :id', [':id' => $userId]);
+}
+
 function update_user_rental_mode(int $userId, string $mode): bool
 {
     return db_execute('UPDATE users SET rental_mode = :mode WHERE id = :id', [':mode' => $mode, ':id' => $userId]);
@@ -420,3 +438,4 @@ function is_vehicle_available(int $vehicleId, string $startDate, string $endDate
 
     return true;
 }
+?>

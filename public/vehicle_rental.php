@@ -1,5 +1,11 @@
 <?php
+// Force absolute error visibility at the engine level
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
+require_once '../src/db.php'; // Adjust path if db.php is in a different directory
 
 $authenticated = $_SESSION['authenticated'] ?? false;
 $current_user = $_SESSION['user'] ?? null;
@@ -9,9 +15,17 @@ if (!$authenticated) {
     exit;
 }
 
+// Redirect back if user manually hits the wrong mode URL
+if (isset($current_user['id'])) {
+    $fresh_user = get_user_by_id((int)$current_user['id']); //
+    if ($fresh_user && $fresh_user['rental_mode'] === 'without_driver') { //
+        header('Location: vehicle_rental_no_driver.php');
+        exit;
+    }
+}
+
 $default_customer_name = $current_user['name'] ?? $current_user['username'] ?? '';
 $default_email = $current_user['email'] ?? '';
-
 
 $section = $_POST['section'] ?? ($_GET['section'] ?? 'vehicles');
 $action = $_POST['action'] ?? 'book';
@@ -21,94 +35,26 @@ if (!in_array($action, ['book', 'reserve'], true)) {
 $errors = [];
 $messages = [];
 
-
-$vehicles = [
-    ['id' => 1, 'type' => 'Car', 'name' => 'Honda Civic 2023', 'model' => 'Sedan', 'capacity' => '5 passengers', 'price_per_day' => 1500, 'status' => 'available', 'icon' => '🚗', 'image' => 'The-New-Civic-Back-View-removebg-preview.png'],
-    ['id' => 2, 'type' => 'Car', 'name' => 'Toyota Corolla 2023', 'model' => 'Sedan', 'capacity' => '5 passengers', 'price_per_day' => 1300, 'status' => 'available', 'icon' => '🚗', 'image' => 'corolla-removebg-preview.png'],
-    ['id' => 3, 'type' => 'Car', 'name' => 'Hyundai Tucson 2023', 'model' => 'SUV', 'capacity' => '7 passengers', 'price_per_day' => 2000, 'status' => 'available', 'icon' => '🚗', 'image' => 'download__4_-removebg-preview.png'],
-    ['id' => 4, 'type' => 'Car', 'name' => 'Mazda CX-5 2023', 'model' => 'SUV', 'capacity' => '7 passengers', 'price_per_day' => 2200, 'status' => 'available', 'icon' => '🚗', 'image' => 'trim-2.5-S.png'],
-    ['id' => 5, 'type' => 'Bike', 'name' => 'Honda Click 125', 'model' => 'Scooter', 'capacity' => '2 passengers', 'price_per_day' => 300, 'status' => 'available', 'icon' => '🏍️', 'image' => 'click.png'],
-    ['id' => 6, 'type' => 'Bike', 'name' => 'Yamaha NMax 155', 'model' => 'Scooter', 'capacity' => '2 passengers', 'price_per_day' => 350, 'status' => 'available', 'icon' => '🏍️', 'image' => 'nmax-removebg-preview (1).png'],
-    ['id' => 7, 'type' => 'Bike', 'name' => 'Honda CB150 Street', 'model' => 'Motorcycle', 'capacity' => '1 passengers', 'price_per_day' => 400, 'status' => 'available', 'icon' => '🏍️', 'image' => 'Macho-Black.jpg'],
-    ['id' => 8, 'type' => 'Car', 'name' => 'Missubibi Mirage 2023', 'model' => 'Hatchback', 'capacity' => '5 passengers', 'price_per_day' => 1200, 'status' => 'available', 'icon' => '🚗', 'image' => 'missubibi-removebg-preview.png'],
-    ['id' => 9, 'type' => 'Van', 'name' => 'Ford Transit 2022', 'model' => 'Van', 'capacity' => '12 passengers', 'price_per_day' => 3500, 'status' => 'available', 'icon' => '🚐', 'image' => 'ford.jpg'],
-    ['id' => 10, 'type' => 'Car', 'name' => 'Honda CR-V 2024', 'model' => 'SUV', 'capacity' => '5 passengers', 'price_per_day' => 2500, 'status' => 'available', 'icon' => '🚗', 'image' => 'crv.jpg'],
-    ['id' => 11, 'type' => 'Truck', 'name' => 'Isuzu D-Max 2023', 'model' => 'Pickup', 'capacity' => '3 passengers', 'price_per_day' => 2800, 'status' => 'available', 'icon' => '🛻', 'image' => 'Isuzu-d-max-1-2024.png'],
-    ['id' => 12, 'type' => 'Bike', 'name' => 'Kawasaki Ninja 400', 'model' => 'Sport', 'capacity' => '1 passengers', 'price_per_day' => 600, 'status' => 'available', 'icon' => '🏍️', 'image' => 'new.jpg'],
-    ['id' => 13, 'type' => 'Car', 'name' => 'Suzuki Swift 2023', 'model' => 'Hatchback', 'capacity' => '5 passengers', 'price_per_day' => 1100, 'status' => 'available', 'icon' => '🚗', 'image' => 'swift.png'],
-    ['id' => 14, 'type' => 'Van', 'name' => 'Toyota Hiace 2021', 'model' => 'Van', 'capacity' => '15 passengers', 'price_per_day' => 4000, 'status' => 'available', 'icon' => '🚐', 'image' => 'hiace.jpg'],
-    ['id' => 15, 'type' => 'Car', 'name' => 'Dodge Charger 2023', 'model' => 'Sports Car', 'capacity' => '3 passengers', 'price_per_day' => 6000, 'status' => 'available', 'icon' => '🚗', 'image' => '2023-dodge-charger (1).png'],
-    ['id' => 16, 'type' => 'Car', 'name' => 'Ferrari SF90', 'model' => 'Sports Car', 'capacity' => '1 passengers', 'price_per_day' => 7000, 'status' => 'available', 'icon' => '🚗', 'image' => 'ferrari.webp'],
-    ['id' => 17, 'type' => 'Car', 'name' => 'Porsche 911 Carrera 2023', 'model' => 'Sports Car', 'capacity' => '2 passengers', 'price_per_day' => 7500, 'status' => 'available', 'icon' => '🚗', 'image' => 'porsche.png'],
-    ['id' => 18, 'type' => 'Car', 'name' => 'Lamborghini Huracan EVO', 'model' => 'Sports Car', 'capacity' => '2 passengers', 'price_per_day' => 9800, 'status' => 'available', 'icon' => '🚗', 'image' => 'lambo-removebg-preview.png'],
-];
-
-$drivers = [
-    ['name' => 'John Paolo Aala', 'experience' => '5 years', 'rating' => 4.9, 'specialty' => 'City navigation and customer service', 'license' => 'Class B', 'image' => 'creator.jpg'],
-    ['name' => 'Deirck Lopez', 'experience' => '7 years', 'rating' => 4.8, 'specialty' => 'Long-distance and heavy vehicles', 'license' => 'Class C', 'image' => 'deirick.png'],
-    ['name' => 'Lance Jerich Macaspac', 'experience' => '4 years', 'rating' => 4.7, 'specialty' => 'Fast and safe delivery routes', 'license' => 'Class B', 'image' => 'erich.jpg'],
-    ['name' => 'Ian Cyrus Nicomedez', 'experience' => '6 years', 'rating' => 4.8, 'specialty' => 'VIP transport and event driving', 'license' => 'Class B', 'image' => 'ian.jpg'],
-];
-
-function get_driver_by_name($name, $drivers)
-{
-    foreach ($drivers as $driver) {
-        if ($driver['name'] === $name) {
-            return $driver;
-        }
-    }
-    return null;
+// Fetch native dataset values from MySQL tables
+try {
+    $vehicles = get_all_vehicles(); //
+    $drivers = get_all_drivers(); //
+} catch (PDOException $e) {
+    echo "<div style='padding:20px; background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; font-family:sans-serif; border-radius:8px; margin:20px;'>";
+    echo "<h3 style='margin-top:0;'>⚠️ Database Fetch Connection Failure</h3>";
+    echo "<p>Your PHP code is sound, but it cannot talk to your local database engine. Make sure the <strong>MySQL module is started in XAMPP</strong>.</p>";
+    echo "<p><strong>Error Trace:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+    echo "</div>";
+    exit;
 }
 
-if (!isset($_SESSION['bookings'])) {
-
-    $_SESSION['bookings'] = [];
-    $_SESSION['booking_counter'] = 0;
-}
-
-$booking_counter = $_SESSION['booking_counter'] ?? 2;
-$bookings = $_SESSION['bookings'] ?? [];
-
-function safe($value)
-{
+function safe($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
-function get_vehicle_by_id($id, $vehicles)
-{
-    foreach ($vehicles as $vehicle) {
-        if ($vehicle['id'] == $id) {
-            return $vehicle;
-        }
-    }
-    return null;
-}
-
-function is_vehicle_available($vehicle_id, $start_date, $end_date, $bookings)
-{
-    foreach ($bookings as $booking) {
-        if ($booking['vehicle_id'] == $vehicle_id && in_array($booking['status'], ['confirmed', 'reserved'], true)) {
-            $booking_start = strtotime($booking['start_date']);
-            $booking_end = strtotime($booking['end_date']);
-            $req_start = strtotime($start_date);
-            $req_end = strtotime($end_date);
-
-            if (!($req_end < $booking_start || $req_start > $booking_end)) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-function vehicle_has_active_booking($vehicle_id, $bookings)
-{
-    foreach ($bookings as $booking) {
-        if ($booking['vehicle_id'] == $vehicle_id && in_array($booking['status'], ['confirmed', 'reserved'], true)) {
-            return true;
-        }
-    }
-    return false;
+// Wrapper for UI state logic compatibility
+function vehicle_has_active_booking_ui($vehicle_id) {
+    return vehicle_has_active_booking((int)$vehicle_id); //
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -117,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $vehicle_id = (int)($_POST['vehicle_id'] ?? 0);
             $customer_name = trim($_POST['customer_name'] ?? '');
             $email = trim($_POST['email'] ?? '');
-            $driver = trim($_POST['driver'] ?? '');
+            $driver_name = trim($_POST['driver'] ?? '');
             $start_date = trim($_POST['start_date'] ?? '');
             $end_date = trim($_POST['end_date'] ?? '');
             $action = $_POST['action'] ?? 'book';
@@ -126,27 +72,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $status = $action === 'reserve' ? 'reserved' : 'confirmed';
 
-            
-            if ($vehicle_id <= 0) {
-                $errors[] = 'Please select a valid vehicle.';
-            }
-            if ($customer_name === '') {
-                $errors[] = 'Customer name is required.';
-            }
+            if ($vehicle_id <= 0) $errors[] = 'Please select a valid vehicle.';
+            if ($customer_name === '') $errors[] = 'Customer name is required.';
             if ($email === '') {
                 $errors[] = 'Email is required.';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = 'Please enter a valid email address.';
             }
-            if ($driver === '') {
-                $errors[] = 'Please choose a driver.';
-            }
-            if ($start_date === '') {
-                $errors[] = 'Start date is required.';
-            }
-            if ($end_date === '') {
-                $errors[] = 'End date is required.';
-            }
+            if ($driver_name === '') $errors[] = 'Please choose a driver.';
+            if ($start_date === '') $errors[] = 'Start date is required.';
+            if ($end_date === '') $errors[] = 'End date is required.';
 
             if (!empty($start_date) && !empty($end_date)) {
                 $start = strtotime($start_date);
@@ -165,27 +100,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errors) && $vehicle_id > 0 && !empty($start_date) && !empty($end_date)) {
-                if (!is_vehicle_available($vehicle_id, $start_date, $end_date, $bookings)) {
+                if (!is_vehicle_available($vehicle_id, $start_date, $end_date)) { //
                     $errors[] = 'Vehicle is not available for the selected dates.';
                 }
             }
 
             if (empty($errors)) {
-                $vehicle = get_vehicle_by_id($vehicle_id, $vehicles);
+                $vehicle = get_vehicle_by_id($vehicle_id); //
                 if ($vehicle) {
                     $start = strtotime($start_date);
                     $end = strtotime($end_date);
                     $days = ($end - $start) / (60 * 60 * 24);
                     $total_cost = $days * $vehicle['price_per_day'];
 
-                    $driver_profile = get_driver_by_name($driver, $drivers);
-                    $new_booking = [
-                        'booking_id' => $booking_counter + 1,
+                    $selected_driver = get_driver_by_name($driver_name); //
+                    $driver_id = $selected_driver ? $selected_driver['id'] : null;
+
+                    $bookingData = [
+                        'user_id' => $current_user['id'] ?? null,
                         'vehicle_id' => $vehicle_id,
+                        'driver_id' => $driver_id,
                         'customer_name' => $customer_name,
                         'email' => $email,
-                        'driver' => $driver,
-                        'driver_profile' => $driver_profile ?: ['experience' => 'N/A', 'rating' => 'N/A', 'specialty' => 'N/A', 'license' => 'N/A', 'image' => ''],
+                        'driver_name' => $driver_name,
                         'start_date' => $start_date,
                         'end_date' => $end_date,
                         'days' => $days,
@@ -193,17 +130,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'status' => $status
                     ];
 
-                    $_SESSION['bookings'][] = $new_booking;
-                    $_SESSION['booking_counter'] = $booking_counter + 1;
-                    $booking_counter++;
-                    $bookings[] = $new_booking;
+                    $booking_id = create_booking($bookingData); //
 
-                    if ($status === 'reserved') {
-                        $messages[] = 'Reservation created! Reservation ID: ' . $new_booking['booking_id'] . '. A confirmation has been sent to ' . safe($email) . '.';
-                    } else {
-                        $messages[] = 'Booking confirmed! Booking ID: ' . $new_booking['booking_id'] . '. A confirmation has been sent to ' . safe($email) . '.';
-                    }
-
+                    $messages[] = $status === 'reserved' ? 'Reservation created! Ref ID: ' . $booking_id : 'Booking confirmed! Ref ID: ' . $booking_id;
                     $_POST = [];
                     $section = 'bookings';
                 } else {
@@ -214,33 +143,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'cancel_booking':
             $booking_id = (int)($_POST['booking_id'] ?? 0);
-
             if ($booking_id > 0) {
-                $found = false;
-                foreach ($_SESSION['bookings'] as $key => $booking) {
-                    
-                    $is_owner = false;
-                    if (isset($current_user['email']) && $booking['email'] === $current_user['email']) {
-                        $is_owner = true;
-                    } elseif (isset($current_user['name']) && $booking['customer_name'] === $current_user['name']) {
-                        $is_owner = true;
-                    }
-
-                    if ($booking['booking_id'] == $booking_id && $is_owner) {
-                        
-                        unset($_SESSION['bookings'][$key]);
-                        $_SESSION['bookings'] = array_values($_SESSION['bookings']);
-                        $messages[] = 'Booking #' . $booking_id . ' has been removed.';
-                        $found = true;
-                        break;
-                    }
-                }
-
-                if (!$found) {
+                $deleted = delete_booking($booking_id, $current_user['id'] ?? null, $current_user['email'] ?? null); //
+                if ($deleted) {
+                    $messages[] = 'Booking #' . $booking_id . ' has been removed.';
+                } else {
                     $errors[] = 'Booking not found or you are not authorized to cancel it.';
                 }
-
-                $bookings = $_SESSION['bookings'];
+                $section = 'bookings';
             }
             break;
 
@@ -249,38 +159,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $rating = (int)($_POST['satisfaction_rating'] ?? 0);
 
             if ($booking_id > 0 && $rating >= 1 && $rating <= 5) {
-                $found = false;
-                foreach ($_SESSION['bookings'] as $key => $booking) {
-                    $is_owner = false;
-                    if (isset($current_user['email']) && $booking['email'] === $current_user['email']) {
-                        $is_owner = true;
-                    } elseif (isset($current_user['name']) && $booking['customer_name'] === $current_user['name']) {
-                        $is_owner = true;
-                    }
-
-                    if ($booking['booking_id'] == $booking_id && $is_owner) {
-                        $_SESSION['bookings'][$key]['satisfaction_rating'] = $rating;
-                        $messages[] = 'Thank you! Your satisfaction rating has been saved.';
-                        $found = true;
-                        break;
-                    }
-                }
-
-                if (!$found) {
+                $rated = rate_booking($booking_id, $rating, $current_user['id'] ?? null, $current_user['email'] ?? null); //
+                if ($rated) {
+                    $messages[] = 'Thank you! Your satisfaction rating has been saved.';
+                } else {
                     $errors[] = 'Booking not found or you are not authorized to rate it.';
                 }
-
-                $bookings = $_SESSION['bookings'];
-                $section = 'bookings';
-            } else {
-                $errors[] = 'Invalid rating. Please provide a rating between 1 and 5.';
                 $section = 'bookings';
             }
             break;
     }
 }
-?>
 
+// Fetch historical bookings ledger from DB
+$bookings = get_bookings_for_user($current_user['id'] ?? null, $current_user['email'] ?? null); //
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -305,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .nav-item.active { background: #ecfdf5; color: var(--primary-dark); }
         .user-area { padding: 1.5rem; border-top: 1px solid var(--border); }
         .user-name { font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
-        .logout-btn { display: inline-block; mt: 0.5rem; color: #ef4444; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; }
+        .logout-btn { display: inline-block; color: #ef4444; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; }
         
         .main-content { flex: 1; margin-left: var(--sidebar-w); padding: 2rem 3rem; }
         .page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; }
@@ -392,8 +285,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="user-area">
             <div class="user-name"><?php echo safe($current_user['name'] ?? 'User'); ?></div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Chauffeur Mode</div>
             <a href="selection.php" class="logout-btn" style="color: var(--primary);">Change Mode</a><br>
+            <?php if (isset($current_user['username']) && $current_user['username'] === 'admin'): ?>
+                <a href="admin_bookings.php" class="logout-btn" style="color: #667eea; display: block; margin-top: 0.5rem; font-weight: 700;">📊 Control Panel</a>
+            <?php endif; ?>
             <a href="logout.php" class="logout-btn">Sign Out</a>
         </div>
     </aside>
@@ -402,7 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="page-header">
             <div>
                 <h1 class="page-title">Chauffeur Service</h1>
-                <p class="page-subtitle">Relax while our professional eco-drivers navigate your route</p>
+                <p class="page-subtitle">Optimize your travel footprint. Fleet managed via EcoTrack's green-routing algorithms.</p>
             </div>
             <div style="font-weight: 500; color: var(--text-muted);"><?php echo date('F d, Y'); ?></div>
         </div>
@@ -414,7 +309,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Active Services</div>
-                <div class="kpi-value"><?php echo count(array_filter($bookings, fn($b) => in_array($b['status'], ['confirmed','reserved']))); ?></div>
+                <div class="kpi-value"><?php echo count(array_filter($bookings, fn($b) => $b['status'] === 'confirmed' || $b['status'] === 'reserved')); ?></div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Driver Status</div>
@@ -446,7 +341,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <div class="vehicle-grid">
                     <?php foreach ($vehicles as $vehicle): ?>
-                        <?php $is_unavailable = vehicle_has_active_booking($vehicle['id'], $bookings); ?>
+                        <?php $is_unavailable = vehicle_has_active_booking_ui($vehicle['id']); ?>
                         <div class="vehicle-card <?php echo $is_unavailable ? 'unavailable' : ''; ?>" <?php if (!$is_unavailable): ?>onclick="bookVehicle(<?php echo $vehicle['id']; ?>)"<?php endif; ?> data-vehicle-type="<?php echo safe($vehicle['type']); ?>" data-vehicle-name="<?php echo safe(strtolower($vehicle['name'])); ?>">
                             <div class="v-image-container">
                                 <img src="assets/images/<?php echo safe($vehicle['image']); ?>" alt="<?php echo safe($vehicle['name']); ?>">
@@ -477,7 +372,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <select name="vehicle_id" required>
                             <option value="">-- Choose a Fleet Vehicle --</option>
                             <?php foreach ($vehicles as $vehicle): ?>
-                                <?php $is_unavailable = vehicle_has_active_booking($vehicle['id'], $bookings); ?>
+                                <?php $is_unavailable = vehicle_has_active_booking_ui($vehicle['id']); ?>
                                 <option value="<?php echo $vehicle['id']; ?>" <?php echo $is_unavailable ? 'disabled' : ''; ?>>
                                     <?php echo safe($vehicle['name'] . ' - ₱' . number_format($vehicle['price_per_day']) . '/day') . ($is_unavailable ? ' (Unavailable)' : ''); ?>
                                 </option>
@@ -530,11 +425,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if (empty($bookings)): ?>
                     <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
                         <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
-                        <p>No active reservations discovered. Ready to catalog your first eco-trip?</p>
+                        <p>No active reservations found. Ready to create your first eco-trip?</p>
                     </div>
                 <?php else: ?>
                     <?php foreach ($bookings as $booking): ?>
-                        <?php $vehicle = get_vehicle_by_id($booking['vehicle_id'], $vehicles); ?>
+                        <?php $vehicle = get_vehicle_by_id((int)$booking['vehicle_id']); // ?> 
                         <div class="booking-card">
                             <div class="b-header">
                                 <span class="b-id">Reservation Account #<?php echo $booking['booking_id']; ?></span>
@@ -544,7 +439,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="b-grid">
                                     <div><span class="b-label">Vehicle Option:</span> <?php echo $vehicle ? safe($vehicle['name']) : 'Fleet Item'; ?></div>
                                     <div><span class="b-label">Schedule:</span> <?php echo safe($booking['start_date']); ?> to <?php echo safe($booking['end_date']); ?> (<?php echo (int)$booking['days']; ?> Days)</div>
-                                    <div><span class="b-label">Chauffeur:</span> <?php echo safe($booking['driver']); ?></div>
+                                    <div><span class="b-label">Chauffeur:</span> <?php echo safe($booking['driver_name'] ?? 'Unassigned'); ?></div>
                                     <div><span class="b-label">Renter:</span> <?php echo safe($booking['customer_name']); ?></div>
                                 </div>
                             </div>
@@ -593,7 +488,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             if(btn) btn.classList.add('active');
-            else document.querySelector(`[data-section="${id}"]`).classList.add('active');
+            else {
+                const targetTab = document.querySelector(`[data-section="${id}"]`);
+                if(targetTab) targetTab.classList.add('active');
+            }
         }
 
         function bookVehicle(id) {
@@ -628,7 +526,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const d = drivers[val];
             box.style.display = 'flex';
             box.innerHTML = `
-                <img src="assets/images/${d.image}" alt="">
+                ${d.image ? `<img src="assets/images/${d.image}">` : ''}
                 <div>
                     <h4 style="font-weight:700; color:var(--text);">${d.name}</h4>
                     <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">
