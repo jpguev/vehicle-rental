@@ -425,7 +425,7 @@ function safe($value)
                 <?php foreach ($category_images as $image): ?>
                     <div class="image-card" data-search="<?php echo strtolower(safe($image['name'] . ' ' . $image['description'])); ?>">
                         <div class="image-container">
-                            <?php if (file_exists($image['name'])): ?>
+                            <?php if (file_exists('assets/images/' . $image['name'])): ?>
                                 <img src="assets/images/<?php echo safe($image['name']); ?>" alt="<?php echo safe($image['name']); ?>">
                             <?php else: ?>
                                 <div style="color: #999; text-align: center;">

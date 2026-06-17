@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
 
-    if ($username === '') { $errors[] = 'Username is required.'; } elseif (isset($users[$username])) { $errors[] = 'That username is already taken.'; }
+    if ($username === '') { $errors[] = 'Username is required.'; }
     if ($password === '') { $errors[] = 'Password is required.'; }
     if ($confirm_password === '') { $errors[] = 'Please confirm your password.'; }
     if ($password !== '' && $confirm_password !== '' && $password !== $confirm_password) { $errors[] = 'Passwords do not match.'; }

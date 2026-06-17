@@ -34,11 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
             setcookie('vehicle_rental_user', $username, time() + 86400, '/');
             $_SESSION['show_cookie_popup'] = true;
-            header('Location: selection.php');
-            exit;
+        } else {
+            $errors[] = 'Invalid username or password.';
         }
-
-        $errors[] = 'Invalid username or password.';
     }
 }
 
@@ -137,7 +135,7 @@ function safe($value) { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF
     <script>
         function closeCookieModal() {
             document.getElementById('cookieModal').style.display = 'none';
-            window.location.href = 'vehicle_rental.php';
+            window.location.href = 'selection.php';
         }
         <?php if (isset($_SESSION['show_cookie_popup']) && $_SESSION['show_cookie_popup']): ?>
             document.getElementById('cookieModal').style.display = 'block';

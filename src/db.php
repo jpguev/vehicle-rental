@@ -130,6 +130,12 @@ function db_init(): void
         ) ENGINE=InnoDB DEFAULT CHARSET=' . DB_CHARSET . ' COLLATE ' . DB_CHARSET . '_unicode_ci'
     );
 
+    $pdo->exec('DELETE v1 FROM vehicles v1 INNER JOIN vehicles v2 WHERE v1.id > v2.id AND v1.name = v2.name');
+
+    try {
+        $pdo->exec('ALTER TABLE vehicles ADD UNIQUE(name)');
+    } catch (Exception $e) {}
+
     ensure_default_data($pdo);
 }
 

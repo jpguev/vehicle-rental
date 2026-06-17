@@ -200,7 +200,7 @@ $bookings = get_bookings_for_user($current_user['id'] ?? null, $current_user['em
         .user-name { font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
         .logout-btn { display: inline-block; color: #ef4444; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; }
         
-        .main-content { flex: 1; margin-left: var(--sidebar-w); padding: 2rem 3rem; }
+        .main-content { flex: 1; margin-left: var(--sidebar-w); padding: 2rem 3rem; background-color: #d8d8d8;}
         .page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; }
         .page-title { font-size: 2rem; font-weight: 800; color: var(--text); }
         .page-subtitle { color: var(--text-muted); margin-top: 0.25rem; }
@@ -214,7 +214,7 @@ $bookings = get_bookings_for_user($current_user['id'] ?? null, $current_user['em
         .content-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .panel { background: var(--surface); border-radius: 1rem; border: 1px solid var(--border); padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .panel { background: #eaeaea; border-radius: 1rem; border: 1px solid var(--border); padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 2rem; }
         .panel h2 { font-size: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
         
         .search-bar { display: flex; gap: 1rem; margin-bottom: 2rem; }
@@ -224,7 +224,8 @@ $bookings = get_bookings_for_user($current_user['id'] ?? null, $current_user['em
         .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: 0.2s; border: none; font-size: 0.95rem; color: white; text-decoration: none; display: inline-block; }
         .btn-primary { background: var(--primary); }
         .btn-primary:hover { background: var(--primary-dark); }
-        .btn-secondary { background: var(--text-muted); }
+        .btn-secondary { background: #ef4444; }
+        .btn-secondary:hover { background: #dc2626; }
         .btn-danger { background: #ef4444; }
         
         .vehicle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
